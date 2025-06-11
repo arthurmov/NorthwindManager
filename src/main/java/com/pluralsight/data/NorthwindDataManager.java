@@ -52,6 +52,35 @@ public class NorthwindDataManager {
     }
 
     public Category getCategoryByName(String categoryName) {
+        Category result = null;
+
+        String query = """
+                SELECT
+                CategoryID,
+                CategoryName
+                FROM
+                categories
+                WHERE CategoryName = ?
+                """;
+
+        try (
+                Connection c = dataSource.getConnection();
+                PreparedStatement s = c.prepareStatement(query);
+
+        ) {
+            s.setString(1, categoryName);
+
+            try(ResultSet queryResults = s.executeQuery();) {
+
+                if (queryResults.next()) {
+                    int categoryId = queryResults.getInt(1);
+                    return new Category(categoryId, categoryName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
@@ -95,11 +124,94 @@ public class NorthwindDataManager {
     }
 
     public List<Product> getProductsByCategory(Category category) {
-        return null;
+        ArrayList<Product> result = new ArrayList<Product>();
+
+        String query = """
+                SELECT
+                	ProductID,
+                    ProductName,
+                    SupplierID,
+                    CategoryID,
+                    UnitPrice
+                FROM products
+                WHERE CategoryId = ?;
+                """;
+
+        try (
+                Connection c = dataSource.getConnection();
+                PreparedStatement s = c.prepareStatement(query);
+
+        ) {
+            s.setInt(1, category.getId());
+
+
+
+            try(ResultSet queryResults = s.executeQuery();) {
+
+                while (queryResults.next()) {
+                    int productId = queryResults.getInt(1);
+                    String productName = queryResults.getString(2);
+                    int supplierId = queryResults.getInt(3);
+                    int categoryId = queryResults.getInt(4);
+                    double price = queryResults.getDouble(5);
+
+
+                    Product product = new Product(productId, productName, categoryId, supplierId, price);
+                    result.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return result;
     }
 
     public List<Product> getProductsByPrice(double minPrice, double maxPrice) {
-        return null;
+        ArrayList<Product> result = new ArrayList<Product>();
+
+        String query = """
+                SELECT
+                	ProductID,
+                    ProductName,
+                    SupplierID,
+                    CategoryID,
+                    UnitPrice
+                FROM products
+                WHERE UnitPrice >= ? AND UnitPrice <= ?;
+                """;
+
+        try (
+                Connection c = dataSource.getConnection();
+                PreparedStatement s = c.prepareStatement(query);
+
+        ) {
+            s.setDouble(1, minPrice);
+            s.setDouble(2, maxPrice);
+
+
+
+            try(ResultSet queryResults = s.executeQuery();) {
+
+                while (queryResults.next()) {
+                    int productId = queryResults.getInt(1);
+                    String productName = queryResults.getString(2);
+                    int supplierId = queryResults.getInt(3);
+                    int categoryId = queryResults.getInt(4);
+                    double price = queryResults.getDouble(5);
+
+
+                    Product product = new Product(productId, productName, categoryId, supplierId, price);
+                    result.add(product);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return result;
     }
 
     public List<Supplier> getSuppliers() {
