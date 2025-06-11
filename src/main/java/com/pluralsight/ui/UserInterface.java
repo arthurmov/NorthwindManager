@@ -1,16 +1,24 @@
 package com.pluralsight.ui;
 
 import com.pluralsight.Console;
+import com.pluralsight.data.NorthwindDataManager;
+import com.pluralsight.models.Category;
 import com.pluralsight.models.Employee;
+import com.pluralsight.models.Product;
+
+import java.util.List;
 
 public class UserInterface {
 
-    public UserInterface() {
-        this.console = new Console();
-    }
-
     private Employee currentEmployee;
     private Console console;
+    private NorthwindDataManager dataManager;
+
+    public UserInterface(NorthwindDataManager dataManager) {
+        this.console = new Console();
+        this.dataManager = dataManager;
+    }
+
 
     public void display() {
         System.out.println("Welcome to the Northwind Manager!");
@@ -20,14 +28,17 @@ public class UserInterface {
     }
 
     private Employee loginUser() {
-        String s = console.promptForString("Hit Enter to login as Matt", true);
-        Employee e = new Employee(1, "Matt", "Christenson");
+        String s = console.promptForString("Hit <ENTER> to login as Arthur", true);
+        Employee e = new Employee(1, "Arthur", "Movsesyan");
         return e;
     }
 
     private void showHomeMenu() {
         
         while(true) {
+            System.out.println();
+            System.out.println();
+
             String[] menuOptions = {
                     "list product categories",
                     "list all products",
@@ -60,8 +71,12 @@ public class UserInterface {
                     listProductsBySupplier();
                     break;
                 case 7:
+                    System.out.println("Goodbye!");
                     System.exit(0);
             }
+
+            console.promptForString("Please press <ENTER> to continue", true);
+
         }
     }
 
@@ -78,8 +93,20 @@ public class UserInterface {
     }
 
     private void listProductsAll() {
+        List<Product> products = dataManager.getProducts();
+        if(products.stream().count() <= 0) {
+            System.out.println("No products found");
+        } else {
+            products.stream().forEach(p -> System.out.println(p));
+        }
     }
 
     private void listCategoriesAll() {
+        List<Category> categories = dataManager.getCategories();
+        if(categories.stream().count() <= 0) {
+            System.out.println("No categories found");
+        } else {
+            categories.stream().forEach(c -> System.out.println(c.getCategoryName()));
+        }
     }
 }
